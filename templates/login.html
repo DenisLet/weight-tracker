@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4 text-center">{{ 'Register' if request.path.endswith('register') else 'Login' }}</h2>
+<form method="post" class="mx-auto" style="max-width:320px">
+  <div class="mb-3">
+    <label class="form-label">Username or email</label>
+    <input name="username" class="form-control" required autofocus>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Password</label>
+    <input type="password" name="password" class="form-control" required>
+  </div>
+  <button class="btn btn-primary w-100">{{ 'Sign up' if request.path.endswith('register') else 'Login' }}</button>
+</form>
+{% endblock %}
