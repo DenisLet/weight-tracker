@@ -1,34 +1,32 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <h2 class="mb-4">Dashboard</h2>
 
 <div class="row g-4">
-  <!-- Goals -->
+  {# -------- Goals -------- #}
   <div class="col-md-3">
     <div class="card shadow-sm h-100">
       <div class="card-body">
         <h5 class="card-title">Your Goals</h5>
         <form method="post" action="{{ url_for('settings') }}">
           <div class="mb-3">
-            <label class="form-label">Height (cm)</label>
-            <input type="number" step="0.1" name="height_cm"
-                   class="form-control"
+            <label class="form-label">Height&nbsp;(cm)</label>
+            <input type="number" step="0.1" name="height_cm" class="form-control"
                    value="{{ current_user.height_cm or '' }}">
           </div>
           <div class="mb-3">
-            <label class="form-label">Start weight (kg)</label>
-            <input type="number" step="0.1" name="start_weight"
-                   class="form-control"
+            <label class="form-label">Start&nbsp;weight&nbsp;(kg)</label>
+            <input type="number" step="0.1" name="start_weight" class="form-control"
                    value="{{ current_user.start_weight or '' }}">
           </div>
           <div class="mb-3">
-            <label class="form-label">Target weight (kg)</label>
-            <input type="number" step="0.1" name="target_weight"
-                   class="form-control"
+            <label class="form-label">Target&nbsp;weight&nbsp;(kg)</label>
+            <input type="number" step="0.1" name="target_weight" class="form-control"
                    value="{{ current_user.target_weight or '' }}">
           </div>
           <div class="mb-3">
-            <label class="form-label">Start date</label>
+            <label class="form-label">Start&nbsp;date</label>
             <input type="date" name="goal_start" class="form-control"
                    value="{{ current_user.goal_start.isoformat()
                             if current_user.goal_start else '' }}">
@@ -40,14 +38,14 @@
           {% set ok = current_user.target_weight is not none and
                        normal_min <= current_user.target_weight <= normal_max %}
           <p class="mt-3 small {{ '' if ok else 'text-danger' }}">
-            Normal&nbsp;BMI&nbsp;range: {{ normal_min|round(1) }} – {{ normal_max|round(1) }} kg
+            Normal&nbsp;BMI&nbsp;range:&nbsp;{{ normal_min|round(1) }}–{{ normal_max|round(1) }}&nbsp;kg
           </p>
         {% endif %}
       </div>
     </div>
   </div>
 
-  <!-- Add / Update Entry -->
+  {# -------- Add entry -------- #}
   <div class="col-md-3">
     <div class="card shadow-sm h-100">
       <div class="card-body">
@@ -59,7 +57,7 @@
                    value="{{ date.today() }}">
           </div>
           <div class="mb-3">
-            <label class="form-label">Weight (kg)</label>
+            <label class="form-label">Weight&nbsp;(kg)</label>
             <input type="number" step="0.1" name="kg"
                    class="form-control" required>
           </div>
@@ -69,7 +67,7 @@
     </div>
   </div>
 
-  <!-- Progress -->
+  {# -------- Progress -------- #}
   <div class="col-md-6">
     <div class="card shadow-sm h-100">
       <div class="card-body">
@@ -97,42 +95,40 @@
   </div>
 </div>
 
-<!-- Chart -->
+{# -------- Chart card -------- #}
 <div class="card shadow-sm mt-4">
   <div class="card-body">
     <div class="d-flex justify-content-between align-items-center mb-2">
       <h5 class="card-title mb-0">Weight trend</h5>
       <div class="d-flex gap-2">
         <select id="chartType" class="form-select form-select-sm w-auto">
-          <option value="line"     selected>Line</option>
-          <option value="bar">       Bar</option>
-          <option value="scatter">   Scatter</option>
-          <option value="area">      Area</option>
-          <option value="timeline">  Timeline</option>
+          <option value="line" selected>Line</option>
+          <option value="bar">Bar</option>
+          <option value="scatter">Scatter</option>
+          <option value="area">Area</option>
+          <option value="timeline">Timeline</option>
         </select>
         <button id="resetBtn" class="btn btn-sm btn-outline-secondary">Reset</button>
       </div>
     </div>
-    <canvas id="weightChart" height="90"></canvas>
+
+    <div id="chart-wrapper" style="height:250px;">
+      <canvas id="weightChart" style="width:100%; height:100%; touch-action: pan-x;"></canvas>
+    </div>
+
     <p class="small text-muted mt-2 mb-0">
-      Zoom: <kbd>Wheel</kbd> / pinch ·&nbsp;Pan: <kbd>Shift</kbd>+Drag
+      Zoom: pinch (mobile) / Wheel (desktop) · Pan: drag (mobile and desktop)
     </p>
   </div>
 </div>
 
+{# -------- Table -------- #}
 <table class="table table-hover mt-4">
   <thead>
-    <tr>
-      <th>Date</th>
-      <th>Weight&nbsp;(kg)</th>
-      <th>BMI</th>
-      <th>PNL&nbsp;(kg)</th>
-      <th></th>
-    </tr>
+    <tr><th>Date</th><th>Weight&nbsp;(kg)</th><th>BMI</th><th>PNL&nbsp;(kg)</th><th></th></tr>
   </thead>
   <tbody>
   {% for r in rows %}
-    {# цвет строки по знаку PNL #}
     {% set cls = '' %}
     {% if r.pnl is not none %}
       {% if r.pnl < 0 %}{% set cls = 'text-success' %}
@@ -142,19 +138,8 @@
     <tr class="{{ cls }}">
       <td>{{ r.day.strftime('%Y-%m-%d') }}</td>
       <td>{{ '%.1f'|format(r.kg) }}</td>
-
-      <td>
-        {% if r.bmi is not none %}
-          {{ '%.1f'|format(r.bmi) }}
-        {% endif %}
-      </td>
-
-      <td>
-        {% if r.pnl is not none %}
-          {{ '%+.1f'|format(r.pnl) }}
-        {% endif %}
-      </td>
-
+      <td>{% if r.bmi is not none %}{{ '%.1f'|format(r.bmi) }}{% endif %}</td>
+      <td>{% if r.pnl is not none %}{{ '%+.1f'|format(r.pnl) }}{% endif %}</td>
       <td class="text-end">
         {% if r.real %}
           <a class="btn btn-sm btn-outline-secondary"
@@ -170,80 +155,97 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Chart.js (у вас уже подключён где-то выше) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-<!-- Адаптер дат -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
-<!-- NEW: плагин zoom/pan -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2"></script>
 
 <script>
 const labels = {{ labels|tojson }};
 const yvals  = {{ data|tojson }};
-const points = labels.map((d, i) => ({ x: new Date(d), y: yvals[i] }));
+const points = labels.map((d,i) => ({ x: new Date(d), y: yvals[i] }));
 
 let chart;
 
-/* формируем datasets под нужный режим */
-function datasetFor(type){
-  if(type === 'timeline'){               // реальная временная шкала
-    return [{ label:'Weight (kg)', data:points,
-              tension:0.3, borderWidth:2, pointRadius:3 }];
+function datasetFor(type) {
+  if (type === 'timeline') {
+    return [{
+      label: 'Weight (kg)',
+      data: points,
+      tension: 0.3,
+      borderWidth: 2,
+      pointRadius: 3
+    }];
   }
-  if(type === 'scatter'){
-    return [{ label:'Weight (kg)',
-              data:labels.map((d,i)=>({x:d, y:yvals[i]})),
-              showLine:false, pointRadius:4 }];
+  if (type === 'scatter') {
+    return [{
+      label: 'Weight (kg)',
+      data: labels.map((d,i) => ({ x: d, y: yvals[i] })),
+      showLine: false,
+      pointRadius: 4
+    }];
   }
-  /* line, bar, area */
-  return [{ label:'Weight (kg)', data:yvals,
-            fill:(type==='area'), tension:0.3,
-            borderWidth:2, pointRadius:3 }];
+  // line, bar, area
+  return [{
+    label: 'Weight (kg)',
+    data: yvals,
+    fill: (type === 'area'),
+    tension: 0.3,
+    borderWidth: 2,
+    pointRadius: 3
+  }];
 }
 
-function build(type){
-  if(chart) chart.destroy();
+function build(type) {
+  if (chart) chart.destroy();
 
   const isTL = (type === 'timeline');
-  chart = new Chart(
-    document.getElementById('weightChart'),
-    {
-      type: (type==='area' || isTL) ? 'line' : type,
-      data: isTL ? { datasets: datasetFor(type) }
-                 : { labels: labels, datasets: datasetFor(type) },
-      options:{
-        responsive:true,
-        plugins:{
-          legend:{ display:false },
-          zoom:{                                // ← главное
-            pan:{
-              enabled:true,
-              mode:'x',
-              modifierKey:'shift'               // Shift+Drag
-            },
-            zoom:{
-              wheel:{ enabled:true },           // колесо
-              pinch:{ enabled:true },           // touch-pinch
-              mode:'x'
+  chart = new Chart(document.getElementById('weightChart'), {
+    type: (type === 'area' || isTL) ? 'line' : type,
+    data: isTL
+      ? { datasets: datasetFor(type) }
+      : { labels: labels, datasets: datasetFor(type) },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: 'x'
+          },
+          zoom: {
+            wheel: { enabled: true },
+            pinch: { enabled: true },
+            mode: 'x'
+          }
+        }
+      },
+      parsing: (type === 'scatter') ? false : true,
+      scales: isTL
+        ? {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'day',
+                tooltipFormat: 'yyyy-MM-dd'
+              }
             }
           }
-        },
-        parsing:(type==='scatter')?false:true,
-        scales: isTL
-          ? { x:{ type:'time',
-                  time:{ unit:'day', tooltipFormat:'yyyy-MM-dd' } } }
-          : (type==='scatter' ? { x:{ type:'category' } } : {})
-      }
+        : (type === 'scatter' ? { x: { type: 'category' } } : {})
     }
-  );
+  });
 }
 
-/* init + controls */
+// initial chart
 build('line');
-document.getElementById('chartType')
-        .addEventListener('change', e=>build(e.target.value));
 
+// chart type selector
+document.getElementById('chartType')
+        .addEventListener('change', e => build(e.target.value));
+
+// reset zoom button
 document.getElementById('resetBtn')
-        .addEventListener('click', ()=>chart.resetZoom());
+        .addEventListener('click', () => chart.resetZoom());
 </script>
 {% endblock %}
